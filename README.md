@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/rydux.svg)](https://badge.fury.io/rb/rydux)
+
 # Rydux
 
 A ruby gem that brings the functionality of Redux to your backend.
