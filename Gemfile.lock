@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rydux (0.9.0)
+    rydux (0.9.1)
 
 GEM
   remote: https://rubygems.org/
