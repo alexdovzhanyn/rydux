@@ -32,7 +32,7 @@ module Rydux
       @reducers.each do |k, reducer|
         new_state = {}
         new_state[k] = reducer.map_state(action, state[k])
-        set_state(new_state)
+        set_state(new_state, action[:type])
       end
     end
 
@@ -42,7 +42,7 @@ module Rydux
 
     private
 
-      def set_state(new_state)
+      def set_state(new_state, last_dispatch = nil)
         new_state.each do |k, v|
           @state[k] = v
 
@@ -52,13 +52,15 @@ module Rydux
             end
           end
 
-          notify_listeners
+          notify_listeners(last_dispatch)
         end
       end
 
-      def notify_listeners
+      def notify_listeners(last_dispatch)
         @listeners.each do |listener|
-          listener.public_send(:state_changed, state)
+          if listener.respond_to? :state_changed
+            listener.public_send(:state_changed, state, last_dispatch)
+          end
         end
       end
 

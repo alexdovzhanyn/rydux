@@ -65,7 +65,7 @@ Or install it yourself as:
       # Every instance that subscribes to the store will
       # get this state_changed method called whenever the state
       # in the store changes. Do whatever you want with your state here.
-      def state_changed(state)
+      def state_changed(state, last_dispatch_type)
         # ...
       end
     end
@@ -102,7 +102,7 @@ class Friend
     @users_name = Store.state.user.name
   end
 
-  def state_changed(state)
+  def state_changed(state, last_dispatch_type)
     @users_name = state.user.name
   end
 
