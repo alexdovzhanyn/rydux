@@ -3,9 +3,8 @@ require 'ostruct'
 module Rydux
   class State < OpenStruct
     def initialize(state)
-      state = state.clone
       super(state)
-      @structure = state
+      @structure = state.clone
     end
 
     def to_s
