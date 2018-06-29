@@ -7,13 +7,21 @@ module Rydux
       @reducers = strap_reducers(reducers)
     end
 
-    def subscribe(listener)
-      @listeners << listener
+    # Allow subscribing either by passing a reference to self
+    # or by passing a block which defines the state keys that
+    # this listener cares about
+    def subscribe(caller = nil, &block)
+      if block_given?
+        notify_when = block.call(state)
+        @listeners << { obj: block.binding.receiver, notify_when: notify_when }
+      else
+        @listeners << { obj: caller }
+      end
     end
 
     # Unsubscribes a listener from the store
     def abandon(listener)
-      @listeners.delete(listener)
+      @listeners.delete_if {|l| l[:obj] == listener }
     end
 
     # Dispatches an action to all reducers. Can be called any of the following ways:
@@ -57,21 +65,25 @@ module Rydux
       # Argument 1 should always be the key within state that we're mutating
       # Argument 2 should be the actual state object
       def set_state(k, v)
-        @state[k] = v
+        if @state[k] != v # Only set state if it has actually changed
+          @state[k] = v
 
-        if !self.methods.include? k
-          self.define_singleton_method(k.to_sym) do
-            return State.new(@state[k])
+          if !self.methods.include? k
+            self.define_singleton_method(k.to_sym) do
+              return State.new(@state[k])
+            end
           end
-        end
 
-        notify_listeners
+          notify_listeners(k)
+        end
       end
 
-      def notify_listeners
+      def notify_listeners(state_key)
         @listeners.each do |listener|
-          if listener.respond_to? :state_changed
-            listener.public_send(:state_changed, state)
+          # If no notify_when, the user wants ALL state notifications
+          # Otherwise, only send the state notifications they've subscribed to.
+          if (!listener[:notify_when] || listener[:notify_when].include?(state_key)) && listener[:obj].respond_to?(:state_changed)
+            listener[:obj].public_send(:state_changed, state)
           end
         end
       end

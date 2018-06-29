@@ -47,19 +47,49 @@ RSpec.describe Rydux do
     expect(store.sample.name).to eq('Mike')
   end
 
-  it "can subscribe to the store" do
+  it "can subscribe to the store as reference" do
     sample = SampleListener.new
+    sample.subscribe_as_reference
     Store.dispatch(type: 'APPEND_PAYLOAD', payload: { new_data: 'Blah' })
 
     expect(sample.store_state.sample.new_data).to eq('Blah')
   end
 
-  it "can unsubscribe from the store" do
+  it "can unsubscribe from the store as reference" do
     Store.dispatch(type: 'APPEND_PAYLOAD', payload: { some_data: 'Wow!' })
     sample = SampleListener.new
+    sample.subscribe_as_reference
     Store.abandon(sample)
     Store.dispatch(type: 'APPEND_PAYLOAD', payload: {some_data: 'No!' })
 
     expect(sample.store_state.sample.some_data).to eq('Wow!')
+  end
+
+  it "can subscribe to the store as block" do
+    sample = SampleListener.new
+    sample.subscribe_as_block
+    Store.dispatch(type: 'APPEND_PAYLOAD', payload: { new_data: 'Blah' })
+
+    expect(sample.store_state.sample.new_data).to eq('Blah')
+  end
+
+  it "can unsubscribe from the store as reference" do
+    Store.dispatch(type: 'APPEND_PAYLOAD', payload: { some_data: 'Wow!' })
+    sample = SampleListener.new
+    sample.subscribe_as_block
+    Store.abandon(sample)
+    Store.dispatch(type: 'APPEND_PAYLOAD', payload: {some_data: 'No!' })
+
+    expect(sample.store_state.sample.some_data).to eq('Wow!')
+  end
+
+  it "can receive only relevent notifications when subscribing as block" do
+    sample = SampleListener.new
+    sample.subscribe_as_block
+    Store.dispatch(type: 'A_FAKE_ACTION', payload: { some_fake_data: 'NAH' })
+    Store.dispatch(type: 'APPEND_PAYLOAD', payload: { real_data: true })
+
+    expect(sample.store_state.sample.some_fake_data).to eq(nil)
+    expect(sample.store_state.sample.real_data).to eq(true)
   end
 end
