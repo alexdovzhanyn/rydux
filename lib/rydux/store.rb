@@ -82,8 +82,10 @@ module Rydux
         @listeners.each do |listener|
           # If no notify_when, the user wants ALL state notifications
           # Otherwise, only send the state notifications they've subscribed to.
-          if (!listener[:notify_when] || listener[:notify_when].include?(state_key)) && listener[:obj].respond_to?(:state_changed)
+          if !listener[:notify_when] && listener[:obj].respond_to?(:state_changed)
             listener[:obj].public_send(:state_changed, state)
+          elsif listener[:notify_when].include?(state_key) && listener[:obj].respond_to?(:state_changed)
+            listener[:obj].public_send(:state_changed, State.new(state[state_key]))
           end
         end
       end

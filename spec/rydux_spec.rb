@@ -89,7 +89,7 @@ RSpec.describe Rydux do
     Store.dispatch(type: 'A_FAKE_ACTION', payload: { some_fake_data: 'NAH' })
     Store.dispatch(type: 'APPEND_PAYLOAD', payload: { real_data: true })
 
-    expect(sample.store_state.sample.some_fake_data).to eq(nil)
-    expect(sample.store_state.sample.real_data).to eq(true)
+    expect(sample.store_state.some_fake_data).to eq(nil)
+    expect(sample.store_state.real_data).to eq(true)
   end
 end
